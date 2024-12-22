@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4" lang="en">
+<head>
+    <title>Binding a List in Thymeleaf</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+</head>
+<body>
+<div class=".container">
+    <div class="section">
+        <a class="button is-primary" th:href="@{/new}">New Prompt</a>
+    </div>
+    <div>
+        <table class="table is-bordered is-striped is-narrow is-hoverable">
+            <thead>
+            <tr>
+                <th scope="col">Id</th>
+                <th scope="col">Created</th>
+                <th scope="col">Content</th>
+                <th scope="col">Edit</th>
+                <th scope="col">Delete</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="chat : ${chats}">
+                <th scope="row" th:text="${chat.id}"></th>
+                <th scope="row" th:text="${chat.createdAt}"></th>
+                <th>
+                    <div th:each="message : ${chat.messages}">
+                        <p th:text="${message.prompt}"></p>
+                        <p th:utext="${message.response}"></p>
+                    </div>
+                </th>
+                <th><a class="button is-info" th:href="@{/edit/{id}(id=${chat.id})}">Edit </a></th>
+                <th><a class="button is-danger" th:href="@{/delete/{id}(id=${chat.id})}">X </a></th>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

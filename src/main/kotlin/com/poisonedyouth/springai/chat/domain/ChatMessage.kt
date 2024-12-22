@@ -13,5 +13,5 @@ data class ChatMessage(
 data class NewChatMessage(
     val id: UUID,
     val prompt: String,
-    val createdAt: Instant,
+    val createdAt: Instant = Instant.now(),
 )

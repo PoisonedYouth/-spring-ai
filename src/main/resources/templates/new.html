@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4" lang="en">
+<head>
+    <title>Binding a List in Thymeleaf</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+</head>
+<body>
+<div class=".container">
+    <div class="section">
+        <a class="button link" th:href="@{/index}">Back</a>
+    </div>
+    <div>
+        <div th:if="${chatResponse} != null">
+            <section th:object="${chatResponse}">
+                <div th:each="message: ${chatResponse.messages}">
+                    <div th:text="${message.createdAt}"></div>
+                    <div th:text="${message.prompt}"></div>
+                    <div th:utext="${message.response}"></div>
+                </div>
+            </section>
+        </div>
+        <div>
+            <form th:action="@{/new}" method="post" class="form" th:object="${newChat}">
+                <div class="field" hidden="hidden">
+                    <label>
+                        <input readonly th:field="${newChat.chatId}">
+                    </label>
+                </div>
+                <div class="field">
+                    <label>
+                        <textarea th:field="${newChat.prompt}" name="prompt" class="textarea" required></textarea>
+                    </label>
+                </div>
+                <br/>
+                <input class="button is=primary" type="submit" value="Add Message"/>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
