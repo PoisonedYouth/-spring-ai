@@ -1,8 +1,8 @@
 package com.poisonedyouth.springai.chat.application
 
 import com.poisonedyouth.springai.chat.domain.Chat
-import com.poisonedyouth.springai.chat.domain.ChatMessage
 import com.poisonedyouth.springai.chat.domain.ChatInputPort
+import com.poisonedyouth.springai.chat.domain.ChatMessage
 import com.poisonedyouth.springai.chat.domain.ChatOutputPort
 import com.poisonedyouth.springai.chat.domain.NewChat
 import com.poisonedyouth.springai.chat.domain.NewChatMessage
@@ -21,18 +21,20 @@ class ChatMessageService(
     private val chatMessageOutputPort: ChatOutputPort,
     private val ollamaChatModel: OllamaChatModel,
 ) : ChatInputPort {
-
     override suspend fun create(chat: NewChat): Chat {
         return chatMessageOutputPort.save(
             Chat(
                 id = chat.id,
                 createdAt = chat.createdAt,
-                messages = emptyList()
-            )
+                messages = emptyList(),
+            ),
         )
     }
 
-    override suspend fun addMessage(chatId: UUID, newChatMessage: NewChatMessage): Chat {
+    override suspend fun addMessage(
+        chatId: UUID,
+        newChatMessage: NewChatMessage,
+    ): Chat {
         val response =
             withContext(Dispatchers.IO) {
                 withTimeout(60000) {
@@ -43,12 +45,13 @@ class ChatMessageService(
         val chat = chatMessageOutputPort.findById(chatId) ?: error("Chat does not exist")
         return chatMessageOutputPort.addMessage(
             chatId = chat.id,
-            message = ChatMessage(
-                id = UUID.randomUUID(),
-                prompt = newChatMessage.prompt,
-                response = response.toList().joinToString("") { it.result.output.content },
-                createdAt = newChatMessage.createdAt,
-            )
+            message =
+                ChatMessage(
+                    id = UUID.randomUUID(),
+                    prompt = newChatMessage.prompt,
+                    response = response.toList().joinToString("") { it.result.output.content },
+                    createdAt = newChatMessage.createdAt,
+                ),
         )
     }
 

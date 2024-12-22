@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>MagicNumber:ChatMessageService.kt$ChatMessageService$60000</ID>
+    <ID>MagicNumber:WebClientConfiguration.kt$WebClientConfiguration$60000</ID>
+    <ID>SpreadOperator:SpringAiApplication.kt$(*args)</ID>
+  </CurrentIssues>
+</SmellBaseline>

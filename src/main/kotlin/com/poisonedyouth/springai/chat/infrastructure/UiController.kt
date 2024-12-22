@@ -13,7 +13,6 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
-
 @Controller
 class UiController(
     private val chatInputPort: ChatInputPort,
@@ -21,26 +20,30 @@ class UiController(
 ) {
     @GetMapping(value = ["/index"])
     suspend fun showIndexView(model: Model): String {
-        model.addAttribute("chats", chatInputPort.getAll().sortedByDescending {
-            it.createdAt
-        }.map { chat ->
-            ChatViewModel(
-                id = chat.id.toString(),
-                messages = chat.messages.map {
-                    ChatMessageViewModel(
-                        id = it.id.toString(),
-                        prompt = it.prompt,
-                        response = markdownService.markdownToHtml(it.response),
-                        createdAt = it.createdAt.atZone(ZoneId.systemDefault())
-                            .format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
-                    )
-                },
-                createdAt = chat.createdAt.atZone(ZoneId.systemDefault())
-                    .format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
-
-            )
-
-        })
+        model.addAttribute(
+            "chats",
+            chatInputPort.getAll().sortedByDescending {
+                it.createdAt
+            }.map { chat ->
+                ChatViewModel(
+                    id = chat.id.toString(),
+                    messages =
+                        chat.messages.map {
+                            ChatMessageViewModel(
+                                id = it.id.toString(),
+                                prompt = it.prompt,
+                                response = markdownService.markdownToHtml(it.response),
+                                createdAt =
+                                    it.createdAt.atZone(ZoneId.systemDefault())
+                                        .format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
+                            )
+                        },
+                    createdAt =
+                        chat.createdAt.atZone(ZoneId.systemDefault())
+                            .format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
+                )
+            },
+        )
         return "index"
     }
 
@@ -51,75 +54,99 @@ class UiController(
     }
 
     @GetMapping(value = ["/edit/{chatId}"])
-    suspend fun editMessage(@PathVariable chatId: UUID, model: Model): String {
+    suspend fun editMessage(
+        @PathVariable chatId: UUID,
+        model: Model,
+    ): String {
         val chat = chatInputPort.get(chatId) ?: error("Chat with id $chatId does not exist")
         model.addAttribute(
-            "chatResponse", ChatViewModel(
+            "chatResponse",
+            ChatViewModel(
                 id = chat.id.toString(),
-                messages = chat.messages.map {
-                    ChatMessageViewModel(
-                        id = it.id.toString(),
-                        prompt = it.prompt,
-                        response = markdownService.markdownToHtml(it.response),
-                        createdAt = it.createdAt.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
-                    )
-                },
-                createdAt = chat.createdAt.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
-            )
+                messages =
+                    chat.messages.map {
+                        ChatMessageViewModel(
+                            id = it.id.toString(),
+                            prompt = it.prompt,
+                            response = markdownService.markdownToHtml(it.response),
+                            createdAt = it.createdAt.atZone(ZoneId.systemDefault())
+                                .format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
+                        )
+                    },
+                createdAt = chat.createdAt.atZone(ZoneId.systemDefault())
+                    .format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
+            ),
         )
-        model.addAttribute("newChat", NewChatMessageViewModel(
-            chatId = chat.id.toString(),
-        ))
+        model.addAttribute(
+            "newChat",
+            NewChatMessageViewModel(
+                chatId = chat.id.toString(),
+            ),
+        )
         return "edit"
     }
 
     @PostMapping(value = ["/new"])
-    suspend fun addMessage(@ModelAttribute newChat: NewChatMessageViewModel, model: Model): String {
-        val chatId = if(!newChat.chatId.isNullOrBlank()) {
-            UUID.fromString(newChat.chatId)
-        }else  {
-            null
-        }
-        val chat = if (chatId != null) {
-            chatInputPort.get(chatId) ?: error("Chat with id $chatId does not exist")
-        } else {
-            chatInputPort.create(
-                NewChat(id = UUID.randomUUID())
+    suspend fun addMessage(
+        @ModelAttribute newChat: NewChatMessageViewModel,
+        model: Model,
+    ): String {
+        val chatId =
+            if (!newChat.chatId.isNullOrBlank()) {
+                UUID.fromString(newChat.chatId)
+            } else {
+                null
+            }
+        val chat =
+            if (chatId != null) {
+                chatInputPort.get(chatId) ?: error("Chat with id $chatId does not exist")
+            } else {
+                chatInputPort.create(
+                    NewChat(id = UUID.randomUUID()),
+                )
+            }
+
+        val updatedChat =
+            chatInputPort.addMessage(
+                chatId = chat.id,
+                newChatMessage =
+                    NewChatMessage(
+                        id = UUID.randomUUID(),
+                        prompt = newChat.prompt,
+                    ),
             )
-        }
-
-
-        val updatedChat = chatInputPort.addMessage(
-            chatId = chat.id,
-            newChatMessage = NewChatMessage(
-                id = UUID.randomUUID(),
-                prompt = newChat.prompt,
-            )
-        )
-
 
         model.addAttribute(
-            "chatResponse", ChatViewModel(
+            "chatResponse",
+            ChatViewModel(
                 id = updatedChat.id.toString(),
-                messages = updatedChat.messages.map {
-                    ChatMessageViewModel(
-                        id = it.id.toString(),
-                        prompt = it.prompt,
-                        response = markdownService.markdownToHtml(it.response),
-                        createdAt = it.createdAt.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
-                    )
-                },
-                createdAt = chat.createdAt.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
-            )
+                messages =
+                    updatedChat.messages.map {
+                        ChatMessageViewModel(
+                            id = it.id.toString(),
+                            prompt = it.prompt,
+                            response = markdownService.markdownToHtml(it.response),
+                            createdAt = it.createdAt.atZone(ZoneId.systemDefault())
+                                .format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
+                        )
+                    },
+                createdAt = chat.createdAt.atZone(ZoneId.systemDefault())
+                    .format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
+            ),
         )
-        model.addAttribute("newChat", NewChatMessageViewModel(
-            chatId = updatedChat.id.toString(),
-        ))
+        model.addAttribute(
+            "newChat",
+            NewChatMessageViewModel(
+                chatId = updatedChat.id.toString(),
+            ),
+        )
         return "new"
     }
 
     @GetMapping(value = ["/delete/{chatId}"])
-    suspend fun deleteMessage(@PathVariable chatId: UUID): String {
+    suspend fun deleteMessage(
+        @PathVariable chatId: UUID,
+    ): String {
         chatInputPort.delete(chatId)
         return "redirect:/index"
     }
@@ -128,7 +155,7 @@ class UiController(
 data class ChatViewModel(
     val id: String,
     val messages: List<ChatMessageViewModel>,
-    val createdAt: String
+    val createdAt: String,
 )
 
 data class ChatMessageViewModel(

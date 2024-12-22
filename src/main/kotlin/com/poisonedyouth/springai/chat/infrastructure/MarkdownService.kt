@@ -5,7 +5,6 @@ import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.springframework.stereotype.Service
 
-
 @Service
 class MarkdownService {
     fun markdownToHtml(markdown: String?): String {

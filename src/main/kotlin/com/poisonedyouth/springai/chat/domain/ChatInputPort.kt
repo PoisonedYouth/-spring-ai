@@ -5,7 +5,10 @@ import java.util.UUID
 interface ChatInputPort {
     suspend fun create(chat: NewChat): Chat
 
-    suspend fun addMessage(chatId: UUID, newChatMessage: NewChatMessage): Chat
+    suspend fun addMessage(
+        chatId: UUID,
+        newChatMessage: NewChatMessage,
+    ): Chat
 
     suspend fun get(chatId: UUID): Chat?
 

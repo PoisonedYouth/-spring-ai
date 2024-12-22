@@ -24,12 +24,15 @@ class ChatRepository(
             ChatEntity(
                 id = chat.id.toString(),
                 createdAt = chat.createdAt,
-            )
+            ),
         ).awaitSingle()
         return chat
     }
 
-    override suspend fun addMessage(chatId: UUID, message: ChatMessage): Chat {
+    override suspend fun addMessage(
+        chatId: UUID,
+        message: ChatMessage,
+    ): Chat {
         val chat = findById(chatId) ?: error("Chat with id $chatId does not exist")
         entityTemplate.insert(
             ChatMessageEntity(
@@ -37,8 +40,8 @@ class ChatRepository(
                 prompt = message.prompt,
                 response = message.response,
                 createdAt = message.createdAt,
-                chatId = chat.id.toString()
-            )
+                chatId = chat.id.toString(),
+            ),
         ).awaitSingleOrNull()
         return chat.addMessage(message)
     }
@@ -57,22 +60,23 @@ class ChatRepository(
     override suspend fun findById(chatId: UUID): Chat? {
         return entityTemplate.select(ChatEntity::class.java)
             .matching(
-                Query.query(where("id").`is`(chatId.toString()))
+                Query.query(where("id").`is`(chatId.toString())),
             ).awaitFirstOrNull()?.let { chat ->
                 Chat(
                     id = UUID.fromString(chat.id),
                     createdAt = chat.createdAt,
-                    messages = entityTemplate.select(ChatMessageEntity::class.java)
-                        .matching(
-                            Query.query(where("chat_id").`is`(chatId.toString()))
-                        ).all().asFlow().toList().map { chatMessage ->
-                            ChatMessage(
-                                id = UUID.fromString(chatMessage.id),
-                                prompt = chatMessage.prompt,
-                                response = chatMessage.response,
-                                createdAt = chatMessage.createdAt,
-                            )
-                        },
+                    messages =
+                        entityTemplate.select(ChatMessageEntity::class.java)
+                            .matching(
+                                Query.query(where("chat_id").`is`(chatId.toString())),
+                            ).all().asFlow().toList().map { chatMessage ->
+                                ChatMessage(
+                                    id = UUID.fromString(chatMessage.id),
+                                    prompt = chatMessage.prompt,
+                                    response = chatMessage.response,
+                                    createdAt = chatMessage.createdAt,
+                                )
+                            },
                 )
             }
     }
@@ -83,17 +87,18 @@ class ChatRepository(
             .asFlow().map { chat ->
                 Chat(
                     id = UUID.fromString(chat.id),
-                    messages = entityTemplate.select(ChatMessageEntity::class.java)
-                        .matching(
-                            Query.query(where("chat_id").`is`(chat.id))
-                        ).all().asFlow().map { chatMessage ->
-                            ChatMessage(
-                                id = UUID.fromString(chatMessage.id),
-                                prompt = chatMessage.prompt,
-                                response = chatMessage.response,
-                                createdAt = chatMessage.createdAt,
-                            )
-                        }.toList(),
+                    messages =
+                        entityTemplate.select(ChatMessageEntity::class.java)
+                            .matching(
+                                Query.query(where("chat_id").`is`(chat.id)),
+                            ).all().asFlow().map { chatMessage ->
+                                ChatMessage(
+                                    id = UUID.fromString(chatMessage.id),
+                                    prompt = chatMessage.prompt,
+                                    response = chatMessage.response,
+                                    createdAt = chatMessage.createdAt,
+                                )
+                            }.toList(),
                 )
             }.toList()
     }

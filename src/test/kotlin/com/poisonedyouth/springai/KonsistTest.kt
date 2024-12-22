@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 
 class KonsistTest {
     @Test
-    fun `verify architecture`()  {
+    fun `verify architecture`() {
         Konsist
             .scopeFromProduction()
             .assertArchitecture {
